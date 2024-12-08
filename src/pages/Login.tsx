@@ -15,10 +15,17 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSignUp) {
-      await signUp(email, password);
-    } else {
-      await signIn(email, password);
+    try {
+      if (isSignUp) {
+        await signUp(email, password);
+      } else {
+        await signIn(email, password);
+      }
+      // Redirect to index after successful login/signup
+      navigate("/");
+    } catch (error) {
+      console.error("Error during authentication:", error);
+      // Optionally, display an error message to the user
     }
   };
 
