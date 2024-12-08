@@ -58,11 +58,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}`,
+          data: {
+            email_confirm: true
+          }
+        }
       });
       if (error) throw error;
       toast({
         title: "Account created!",
-        description: "Please check your email to verify your account.",
+        description: "You can now sign in with your credentials.",
       });
     } catch (error) {
       toast({
