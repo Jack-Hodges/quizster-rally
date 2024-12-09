@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Form } from "@/components/ui/form";
@@ -16,6 +16,8 @@ const CreateQuiz = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const form = useForm<QuizFormValues>({
     resolver: zodResolver(createQuizSchema),
     defaultValues: {
@@ -38,6 +40,16 @@ const CreateQuiz = () => {
   }, [user, navigate]);
 
   const onSubmit = async (data: QuizFormValues) => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create a quiz.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       const { error } = await supabase
         .from('quizzes')
@@ -46,14 +58,15 @@ const CreateQuiz = () => {
             title: data.title,
             description: data.description,
             questions: data.questions,
-            user_id: user?.id
+            user_id: user.id,
+            is_published: false
           }
         ]);
 
       if (error) throw error;
 
       toast({
-        title: "Quiz created!",
+        title: "Success!",
         description: "Your quiz has been created successfully.",
       });
       navigate('/');
@@ -64,6 +77,8 @@ const CreateQuiz = () => {
         description: "Failed to create quiz. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -135,8 +150,8 @@ const CreateQuiz = () => {
               ))}
             </div>
 
-            <Button type="submit" className="w-full">
-              Create Quiz
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Creating Quiz..." : "Create Quiz"}
             </Button>
           </form>
         </Form>
