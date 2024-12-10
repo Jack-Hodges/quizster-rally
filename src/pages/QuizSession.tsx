@@ -43,7 +43,18 @@ const QuizSession = () => {
           .single();
 
         if (sessionError) throw sessionError;
-        setSession(sessionData);
+        
+        // Transform the data to match our Session type
+        const formattedSession: Session = {
+          id: sessionData.id,
+          code: sessionData.code,
+          quiz: {
+            title: sessionData.quiz[0].title,
+            description: sessionData.quiz[0].description,
+          }
+        };
+        
+        setSession(formattedSession);
 
         // Fetch initial participants
         const { data: participantsData, error: participantsError } = await supabase
