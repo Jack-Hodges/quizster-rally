@@ -62,7 +62,7 @@ const QuizSession = () => {
           code: sessionData.code,
           status: sessionData.status,
           host_id: sessionData.host_id,
-          quiz: sessionData.quiz
+          quiz: sessionData.quiz as QuizData
         });
         
         setIsHost(sessionData.host_id === user?.id);
