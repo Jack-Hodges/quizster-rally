@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export function JoinQuizForm({ code, onJoin }: { code?: string; onJoin: (sessionId: string) => void }) {
   const [quizCode, setQuizCode] = useState(code || "");
@@ -21,10 +20,10 @@ export function JoinQuizForm({ code, onJoin }: { code?: string; onJoin: (session
         .from("quiz_sessions")
         .select("id")
         .eq("code", quizCode)
-        .eq("status", "waiting")
-        .single();
+        .eq("status", "waiting");
 
-      if (sessionError || !sessions) {
+      if (sessionError) throw sessionError;
+      if (!sessions || sessions.length === 0) {
         throw new Error("Invalid quiz code or quiz has already started");
       }
 
@@ -33,7 +32,7 @@ export function JoinQuizForm({ code, onJoin }: { code?: string; onJoin: (session
         .from("quiz_participants")
         .insert([
           {
-            session_id: sessions.id,
+            session_id: sessions[0].id,
             name: name,
           },
         ]);
@@ -45,7 +44,7 @@ export function JoinQuizForm({ code, onJoin }: { code?: string; onJoin: (session
         description: "You've joined the quiz session.",
       });
 
-      onJoin(sessions.id);
+      onJoin(sessions[0].id);
     } catch (error) {
       toast({
         variant: "destructive",

@@ -34,7 +34,7 @@ const QuizSession = () => {
           .select(`
             id,
             code,
-            quiz:quizzes (
+            quiz:quizzes!fk_quiz (
               title,
               description
             )
@@ -49,8 +49,8 @@ const QuizSession = () => {
           id: sessionData.id,
           code: sessionData.code,
           quiz: {
-            title: sessionData.quiz[0].title,
-            description: sessionData.quiz[0].description,
+            title: sessionData.quiz.title,
+            description: sessionData.quiz.description,
           }
         };
         
