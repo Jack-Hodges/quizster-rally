@@ -36,7 +36,9 @@ const QuizSessionPage = () => {
           code, 
           status,
           host_id,
-          quizzes!fk_quiz (questions)
+          quiz:quizzes (
+            questions
+          )
         `)
         .eq("id", sessionId)
         .single();
@@ -54,7 +56,7 @@ const QuizSessionPage = () => {
         return;
       }
 
-      if (!data || !data.quizzes) {
+      if (!data || !data.quiz) {
         console.error('No data or quiz found');
         toast({
           variant: "destructive",
@@ -69,7 +71,7 @@ const QuizSessionPage = () => {
         code: data.code,
         status: data.status,
         host_id: data.host_id,
-        questions: data.quizzes.questions
+        questions: data.quiz.questions
       };
 
       console.log('Transformed session details:', transformedDetails);
