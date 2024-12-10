@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Eye, Edit, List } from "lucide-react";
+import { Eye, Edit, Play } from "lucide-react";
 import { QuizFormValues } from "@/types/quiz";
 
 interface Quiz extends QuizFormValues {
@@ -50,6 +50,44 @@ const MyQuizzes = () => {
 
     fetchQuizzes();
   }, [user, navigate, toast]);
+
+  const startQuizSession = async (quizId: string) => {
+    if (!user) return;
+
+    try {
+      // Generate a random 6-character code
+      const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+      const { data, error } = await supabase
+        .from('quiz_sessions')
+        .insert([
+          {
+            quiz_id: quizId,
+            code,
+            host_id: user.id,
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Quiz session started! Share the code: " + code,
+      });
+
+      // Navigate to the session page
+      navigate(`/session/${data.id}`);
+    } catch (error) {
+      console.error('Error starting quiz session:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start quiz session",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (loading) {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
@@ -100,6 +138,14 @@ const MyQuizzes = () => {
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => navigate(`/edit/${quiz.id}`)}>
                           <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => startQuizSession(quiz.id)}
+                          className="text-green-600 hover:text-green-700"
+                        >
+                          <Play className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
