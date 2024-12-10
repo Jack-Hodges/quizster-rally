@@ -52,7 +52,7 @@ const QuizSession = () => {
           .single();
 
         if (sessionError) throw sessionError;
-        
+
         // Transform the data to match the Session interface
         const transformedSession: Session = {
           id: sessionData.id,

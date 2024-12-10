@@ -6,6 +6,12 @@ import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
+interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+}
+
 const QuizSessionPage = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
@@ -15,11 +21,7 @@ const QuizSessionPage = () => {
     code: string;
     status: string;
     host_id: string;
-    questions: Array<{
-      question: string;
-      options: string[];
-      correctAnswer: number;
-    }>;
+    questions: QuizQuestion[];
   } | null>(null);
 
   useEffect(() => {
