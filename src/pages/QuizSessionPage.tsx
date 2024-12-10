@@ -12,24 +12,22 @@ interface QuizQuestion {
   correctAnswer: number;
 }
 
-interface SessionDetails {
-  code: string;
-  status: string;
-  host_id: string;
-  questions: QuizQuestion[];
-}
-
 const QuizSessionPage = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [sessionDetails, setSessionDetails] = useState<SessionDetails | null>(null);
+  const [sessionDetails, setSessionDetails] = useState<{
+    code: string;
+    status: string;
+    host_id: string;
+    questions: QuizQuestion[];
+  } | null>(null);
 
   useEffect(() => {
     const fetchSessionDetails = async () => {
       if (!sessionId) return;
-    
+
       const { data, error } = await supabase
         .from("quiz_sessions")
         .select(`
@@ -41,10 +39,7 @@ const QuizSessionPage = () => {
         .eq("id", sessionId)
         .single();
 
-      console.log('Raw Supabase response:', data);
-    
       if (error) {
-        console.error('Supabase error:', error);
         toast({
           variant: "destructive",
           title: "Error",
@@ -54,27 +49,12 @@ const QuizSessionPage = () => {
         return;
       }
 
-      if (!data || !data.quizzes) {
-        console.error('No data or quiz found');
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Quiz session not found",
-        });
-        navigate("/join");
-        return;
-      }
-
-      const transformedDetails: SessionDetails = {
+      setSessionDetails({
         code: data.code,
         status: data.status,
         host_id: data.host_id,
         questions: data.quizzes.questions
-      };
-
-      console.log('Transformed session details:', transformedDetails);
-    
-      setSessionDetails(transformedDetails);
+      });
     };
 
     fetchSessionDetails();

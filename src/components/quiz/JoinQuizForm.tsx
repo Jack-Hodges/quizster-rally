@@ -40,8 +40,8 @@ export function JoinQuizForm({ code, onJoin }: { code?: string; onJoin: (session
       if (participantError) throw participantError;
 
       toast({
-        title: "Joined successfully!",
-        description: "You've joined the quiz session.",
+        title: "You're in! 🎉",
+        description: "You've joined the game, wait around for everyone else.",
       });
 
       onJoin(sessions[0].id);

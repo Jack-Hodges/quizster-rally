@@ -10,11 +10,11 @@ import { QuizSession as QuizSessionComponent } from "@/components/quiz/QuizSessi
 interface QuizData {
   title: string;
   description: string;
-  questions: Array<{
+  questions: {
     question: string;
     options: string[];
     correctAnswer: number;
-  }>;
+  }[];
 }
 
 interface Session {
@@ -36,7 +36,7 @@ const QuizSession = () => {
     const fetchSessionDetails = async () => {
       try {
         const { data: sessionData, error: sessionError } = await supabase
-          .from('quiz_sessions')
+          .from("quiz_sessions")
           .select(`
             id,
             code,
@@ -48,18 +48,18 @@ const QuizSession = () => {
               questions
             )
           `)
-          .eq('id', sessionId)
+          .eq("id", sessionId)
           .single();
 
-        console.log('Raw Supabase response:', sessionData);
+        console.log("Raw Supabase response:", sessionData);
+        console.log("Title is:", sessionData.quiz);
 
-        if (sessionError) throw sessionError;
-
-        if (!sessionData || !sessionData.quiz) {
-          throw new Error('Quiz session not found');
+        if (sessionError || !sessionData || !sessionData.quiz) {
+          throw new Error(
+            sessionError?.message || "Quiz session or quiz details not found"
+          );
         }
 
-        // Transform the data to match our expected types
         const transformedSession: Session = {
           id: sessionData.id,
           code: sessionData.code,
@@ -68,16 +68,15 @@ const QuizSession = () => {
           quiz: {
             title: sessionData.quiz.title,
             description: sessionData.quiz.description,
-            questions: sessionData.quiz.questions
-          }
+            questions: sessionData.quiz.questions,
+          },
         };
 
-        console.log('Transformed session:', transformedSession);
-        
+        console.log("Transformed session:", transformedSession);
         setSession(transformedSession);
         setIsHost(sessionData.host_id === user?.id);
       } catch (error) {
-        console.error('Error fetching session details:', error);
+        console.error("Error fetching session details:", error);
         toast({
           title: "Error",
           description: "Failed to load session details",
@@ -105,8 +104,7 @@ const QuizSession = () => {
               <h2 className="text-2xl font-bold mb-2">Session Code</h2>
               <p className="text-4xl font-mono tracking-wider">{session.code}</p>
             </div>
-            
-            <QuizSessionComponent 
+            <QuizSessionComponent
               sessionId={session.id}
               isHost={isHost}
               status={session.status}
