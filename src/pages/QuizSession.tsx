@@ -49,26 +49,22 @@ const QuizSession = () => {
             )
           `)
           .eq('id', sessionId)
-          .single(); // This ensures the query expects a single object
+          .single();
 
         if (sessionError) throw sessionError;
 
-        // Transform the data to match the Session interface
-        const transformedSession: Session = {
+        if (!sessionData || !sessionData.quiz) {
+          throw new Error('Quiz session not found');
+        }
+
+        setSession({
           id: sessionData.id,
           code: sessionData.code,
           status: sessionData.status,
           host_id: sessionData.host_id,
-          quiz: Array.isArray(sessionData.quiz) 
-            ? sessionData.quiz.map((quizEntry) => ({
-                title: quizEntry.title,
-                description: quizEntry.description,
-                questions: quizEntry.questions,
-              }))[0] // Use [0] to pick the first quiz if you know there's only one
-            : sessionData.quiz
-        };
+          quiz: sessionData.quiz
+        });
         
-        setSession(transformedSession);
         setIsHost(sessionData.host_id === user?.id);
       } catch (error) {
         console.error('Error fetching session details:', error);

@@ -50,15 +50,22 @@ const QuizSessionPage = () => {
         navigate("/join");
         return;
       }
-    
-      // Ensure data.quizzes is handled properly
-      const quizData = Array.isArray(data.quizzes) ? data.quizzes[0] : data.quizzes;
+
+      if (!data || !data.quizzes) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Quiz session not found",
+        });
+        navigate("/join");
+        return;
+      }
     
       setSessionDetails({
         code: data.code,
         status: data.status,
         host_id: data.host_id,
-        questions: quizData.questions
+        questions: data.quizzes.questions
       });
     };
 
