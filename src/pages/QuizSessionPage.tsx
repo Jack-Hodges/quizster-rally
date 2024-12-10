@@ -65,7 +65,7 @@ const QuizSessionPage = () => {
         code: data.code,
         status: data.status,
         host_id: data.host_id,
-        questions: data.quizzes.questions as QuizQuestion[]
+        questions: data.quizzes.questions
       });
     };
 
