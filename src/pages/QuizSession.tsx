@@ -10,13 +10,15 @@ interface Participant {
   name: string;
 }
 
+interface QuizData {
+  title: string;
+  description: string;
+}
+
 interface Session {
   id: string;
   code: string;
-  quiz: {
-    title: string;
-    description: string;
-  };
+  quiz: QuizData;
 }
 
 const QuizSession = () => {
