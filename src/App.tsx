@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import CreateQuiz from "./pages/CreateQuiz";
 import JoinQuiz from "./pages/JoinQuiz";
 import Login from "./pages/Login";
+import MyQuizzes from "./pages/MyQuizzes";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
             <Route path="/create" element={<CreateQuiz />} />
             <Route path="/join" element={<JoinQuiz />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/my-quizzes" element={<MyQuizzes />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
