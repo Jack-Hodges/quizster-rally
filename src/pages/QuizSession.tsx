@@ -1,24 +1,27 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-interface Participant {
-  id: string;
-  name: string;
-}
+import { Button } from "@/components/ui/button";
+import { QuizSession as QuizSessionComponent } from "@/components/quiz/QuizSession";
 
 interface QuizData {
   title: string;
   description: string;
+  questions: Array<{
+    question: string;
+    options: string[];
+    correctAnswer: number;
+  }>;
 }
 
 interface Session {
   id: string;
   code: string;
   quiz: QuizData;
+  status: string;
 }
 
 const QuizSession = () => {
@@ -26,7 +29,7 @@ const QuizSession = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [session, setSession] = useState<Session | null>(null);
-  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [isHost, setIsHost] = useState(false);
 
   useEffect(() => {
     const fetchSessionDetails = async () => {
@@ -36,9 +39,12 @@ const QuizSession = () => {
           .select(`
             id,
             code,
+            status,
+            host_id,
             quiz:quizzes!fk_quiz (
               title,
-              description
+              description,
+              questions
             )
           `)
           .eq('id', sessionId)
@@ -46,26 +52,8 @@ const QuizSession = () => {
 
         if (sessionError) throw sessionError;
         
-        // Transform the data to match our Session type
-        const formattedSession: Session = {
-          id: sessionData.id,
-          code: sessionData.code,
-          quiz: {
-            title: sessionData.quiz.title,
-            description: sessionData.quiz.description,
-          }
-        };
-        
-        setSession(formattedSession);
-
-        // Fetch initial participants
-        const { data: participantsData, error: participantsError } = await supabase
-          .from('quiz_participants')
-          .select('id, name')
-          .eq('session_id', sessionId);
-
-        if (participantsError) throw participantsError;
-        setParticipants(participantsData || []);
+        setSession(sessionData);
+        setIsHost(sessionData.host_id === user?.id);
       } catch (error) {
         console.error('Error fetching session details:', error);
         toast({
@@ -77,28 +65,43 @@ const QuizSession = () => {
     };
 
     fetchSessionDetails();
+  }, [sessionId, toast, user?.id]);
 
-    // Subscribe to new participants
-    const participantsSubscription = supabase
-      .channel('quiz_participants')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'quiz_participants',
-          filter: `session_id=eq.${sessionId}`,
-        },
-        (payload) => {
-          setParticipants((current) => [...current, payload.new as Participant]);
-        }
-      )
-      .subscribe();
+  const handleStartQuiz = async () => {
+    if (!sessionId) return;
 
-    return () => {
-      participantsSubscription.unsubscribe();
-    };
-  }, [sessionId, toast]);
+    try {
+      // Update session status
+      const { error: updateError } = await supabase
+        .from('quiz_sessions')
+        .update({ status: 'in_progress' })
+        .eq('id', sessionId);
+
+      if (updateError) throw updateError;
+
+      // Initialize quiz progress
+      const { error: progressError } = await supabase
+        .from('quiz_session_progress')
+        .insert({
+          session_id: sessionId,
+          current_question_index: 0
+        });
+
+      if (progressError) throw progressError;
+
+      toast({
+        title: "Success",
+        description: "Quiz started successfully!",
+      });
+    } catch (error) {
+      console.error('Error starting quiz:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start quiz",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (!session) {
     return <div>Loading...</div>;
@@ -117,19 +120,21 @@ const QuizSession = () => {
               <p className="text-4xl font-mono tracking-wider">{session.code}</p>
             </div>
             
-            <div>
-              <h3 className="text-xl font-semibold mb-4">Participants</h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {participants.map((participant) => (
-                  <div
-                    key={participant.id}
-                    className="bg-white p-3 rounded-lg shadow text-center"
-                  >
-                    {participant.name}
-                  </div>
-                ))}
-              </div>
-            </div>
+            {isHost && session.status === 'waiting' && (
+              <Button 
+                onClick={handleStartQuiz}
+                className="w-full mb-4"
+              >
+                Start Quiz
+              </Button>
+            )}
+
+            <QuizSessionComponent 
+              sessionId={sessionId!} 
+              isHost={isHost}
+              status={session.status}
+              questions={session.quiz.questions}
+            />
           </CardContent>
         </Card>
       </div>

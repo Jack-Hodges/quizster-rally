@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      participant_answers: {
+        Row: {
+          created_at: string
+          id: string
+          participant_id: string
+          question_index: number
+          selected_option: number
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          participant_id: string
+          question_index: number
+          selected_option: number
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          participant_id?: string
+          question_index?: number
+          selected_option?: number
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "participant_answers_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "participant_answers_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quiz_participants: {
         Row: {
           created_at: string
@@ -31,6 +73,35 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "quiz_participants_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_session_progress: {
+        Row: {
+          created_at: string
+          current_question_index: number
+          id: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_question_index?: number
+          id?: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          current_question_index?: number
+          id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_session_progress_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
             referencedRelation: "quiz_sessions"
