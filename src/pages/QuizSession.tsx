@@ -49,7 +49,7 @@ const QuizSession = () => {
             )
           `)
           .eq('id', sessionId)
-          .single();
+          .single(); // This ensures the query expects a single object
 
         if (sessionError) throw sessionError;
 
@@ -59,11 +59,13 @@ const QuizSession = () => {
           code: sessionData.code,
           status: sessionData.status,
           host_id: sessionData.host_id,
-          quiz: {
-            title: sessionData.quiz.title,
-            description: sessionData.quiz.description,
-            questions: sessionData.quiz.questions
-          }
+          quiz: Array.isArray(sessionData.quiz) 
+            ? sessionData.quiz.map((quizEntry) => ({
+                title: quizEntry.title,
+                description: quizEntry.description,
+                questions: quizEntry.questions,
+              }))[0] // Use [0] to pick the first quiz if you know there's only one
+            : sessionData.quiz
         };
         
         setSession(transformedSession);

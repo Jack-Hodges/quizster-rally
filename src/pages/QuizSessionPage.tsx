@@ -27,7 +27,7 @@ const QuizSessionPage = () => {
   useEffect(() => {
     const fetchSessionDetails = async () => {
       if (!sessionId) return;
-
+    
       const { data, error } = await supabase
         .from("quiz_sessions")
         .select(`
@@ -38,7 +38,7 @@ const QuizSessionPage = () => {
         `)
         .eq("id", sessionId)
         .single();
-
+    
       if (error) {
         toast({
           variant: "destructive",
@@ -48,12 +48,15 @@ const QuizSessionPage = () => {
         navigate("/join");
         return;
       }
-
+    
+      // Ensure data.quizzes is handled properly
+      const quizData = Array.isArray(data.quizzes) ? data.quizzes[0] : data.quizzes;
+    
       setSessionDetails({
         code: data.code,
         status: data.status,
         host_id: data.host_id,
-        questions: data.quizzes.questions
+        questions: quizData.questions
       });
     };
 
