@@ -12,17 +12,19 @@ interface QuizQuestion {
   correctAnswer: number;
 }
 
+interface SessionDetails {
+  code: string;
+  status: string;
+  host_id: string;
+  questions: QuizQuestion[];
+}
+
 const QuizSessionPage = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [sessionDetails, setSessionDetails] = useState<{
-    code: string;
-    status: string;
-    host_id: string;
-    questions: QuizQuestion[];
-  } | null>(null);
+  const [sessionDetails, setSessionDetails] = useState<SessionDetails | null>(null);
 
   useEffect(() => {
     const fetchSessionDetails = async () => {
