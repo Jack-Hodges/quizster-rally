@@ -4,14 +4,22 @@ import { Button } from "@/components/ui/button";
 import { QuizSession } from "@/components/quiz/QuizSession";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const QuizSessionPage = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [sessionDetails, setSessionDetails] = useState<{
     code: string;
     status: string;
+    host_id: string;
+    questions: Array<{
+      question: string;
+      options: string[];
+      correctAnswer: number;
+    }>;
   } | null>(null);
 
   useEffect(() => {
@@ -20,7 +28,12 @@ const QuizSessionPage = () => {
 
       const { data, error } = await supabase
         .from("quiz_sessions")
-        .select("code, status")
+        .select(`
+          code, 
+          status,
+          host_id,
+          quizzes!fk_quiz (questions)
+        `)
         .eq("id", sessionId)
         .single();
 
@@ -34,7 +47,12 @@ const QuizSessionPage = () => {
         return;
       }
 
-      setSessionDetails(data);
+      setSessionDetails({
+        code: data.code,
+        status: data.status,
+        host_id: data.host_id,
+        questions: data.quizzes.questions
+      });
     };
 
     fetchSessionDetails();
@@ -56,7 +74,12 @@ const QuizSessionPage = () => {
             <p className="text-lg mb-4">
               Session Code: <span className="font-mono font-bold">{sessionDetails.code}</span>
             </p>
-            <QuizSession sessionId={sessionId} />
+            <QuizSession 
+              sessionId={sessionId} 
+              isHost={user?.id === sessionDetails.host_id}
+              status={sessionDetails.status}
+              questions={sessionDetails.questions}
+            />
           </div>
         </div>
       </div>

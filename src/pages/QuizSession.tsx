@@ -22,6 +22,7 @@ interface Session {
   code: string;
   quiz: QuizData;
   status: string;
+  host_id: string;
 }
 
 const QuizSession = () => {
@@ -52,7 +53,20 @@ const QuizSession = () => {
 
         if (sessionError) throw sessionError;
         
-        setSession(sessionData);
+        // Transform the data to match the Session interface
+        const transformedSession: Session = {
+          id: sessionData.id,
+          code: sessionData.code,
+          status: sessionData.status,
+          host_id: sessionData.host_id,
+          quiz: {
+            title: sessionData.quiz.title,
+            description: sessionData.quiz.description,
+            questions: sessionData.quiz.questions
+          }
+        };
+        
+        setSession(transformedSession);
         setIsHost(sessionData.host_id === user?.id);
       } catch (error) {
         console.error('Error fetching session details:', error);
@@ -66,42 +80,6 @@ const QuizSession = () => {
 
     fetchSessionDetails();
   }, [sessionId, toast, user?.id]);
-
-  const handleStartQuiz = async () => {
-    if (!sessionId) return;
-
-    try {
-      // Update session status
-      const { error: updateError } = await supabase
-        .from('quiz_sessions')
-        .update({ status: 'in_progress' })
-        .eq('id', sessionId);
-
-      if (updateError) throw updateError;
-
-      // Initialize quiz progress
-      const { error: progressError } = await supabase
-        .from('quiz_session_progress')
-        .insert({
-          session_id: sessionId,
-          current_question_index: 0
-        });
-
-      if (progressError) throw progressError;
-
-      toast({
-        title: "Success",
-        description: "Quiz started successfully!",
-      });
-    } catch (error) {
-      console.error('Error starting quiz:', error);
-      toast({
-        title: "Error",
-        description: "Failed to start quiz",
-        variant: "destructive",
-      });
-    }
-  };
 
   if (!session) {
     return <div>Loading...</div>;
@@ -120,17 +98,8 @@ const QuizSession = () => {
               <p className="text-4xl font-mono tracking-wider">{session.code}</p>
             </div>
             
-            {isHost && session.status === 'waiting' && (
-              <Button 
-                onClick={handleStartQuiz}
-                className="w-full mb-4"
-              >
-                Start Quiz
-              </Button>
-            )}
-
             <QuizSessionComponent 
-              sessionId={sessionId!} 
+              sessionId={session.id}
               isHost={isHost}
               status={session.status}
               questions={session.quiz.questions}
