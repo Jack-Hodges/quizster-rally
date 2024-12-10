@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +20,7 @@ const JoinQuiz = () => {
   const [quizzes, setQuizzes] = useState<PublicQuiz[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useState(() => {
+  useEffect(() => {
     const fetchPublicQuizzes = async () => {
       try {
         const { data, error } = await supabase
