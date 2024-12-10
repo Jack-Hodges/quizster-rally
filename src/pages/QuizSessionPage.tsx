@@ -34,7 +34,9 @@ const QuizSessionPage = () => {
           code, 
           status,
           host_id,
-          quizzes!fk_quiz (questions)
+          quiz:quizzes (
+            questions
+          )
         `)
         .eq("id", sessionId)
         .single();
@@ -50,6 +52,18 @@ const QuizSessionPage = () => {
       }
 
       setSessionDetails({
+      if (!data || !data.quiz) {
+        console.error('No data or quiz found');
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Quiz session not found",
+        });
+        navigate("/join");
+        return;
+      }
+
+      const transformedDetails: SessionDetails = {
         code: data.code,
         status: data.status,
         host_id: data.host_id,

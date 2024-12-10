@@ -42,7 +42,8 @@ const QuizSession = () => {
             code,
             status,
             host_id,
-            quiz:quizzes!fk_quiz (
+            quiz_id,
+            quiz:quizzes (
               title,
               description,
               questions
