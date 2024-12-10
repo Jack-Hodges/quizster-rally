@@ -9,6 +9,77 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      quiz_participants: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_participants_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_sessions: {
+        Row: {
+          code: string
+          created_at: string
+          host_id: string
+          id: string
+          quiz_id: string
+          status: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          host_id: string
+          id?: string
+          quiz_id: string
+          status?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          host_id?: string
+          id?: string
+          quiz_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_quiz"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_sessions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quizzes: {
         Row: {
           created_at: string
