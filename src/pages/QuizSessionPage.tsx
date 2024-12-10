@@ -40,8 +40,11 @@ const QuizSessionPage = () => {
         `)
         .eq("id", sessionId)
         .single();
+
+      console.log('Raw Supabase response:', data);
     
       if (error) {
+        console.error('Supabase error:', error);
         toast({
           variant: "destructive",
           title: "Error",
@@ -52,6 +55,7 @@ const QuizSessionPage = () => {
       }
 
       if (!data || !data.quizzes) {
+        console.error('No data or quiz found');
         toast({
           variant: "destructive",
           title: "Error",
@@ -60,13 +64,17 @@ const QuizSessionPage = () => {
         navigate("/join");
         return;
       }
-    
-      setSessionDetails({
+
+      const transformedDetails: SessionDetails = {
         code: data.code,
         status: data.status,
         host_id: data.host_id,
         questions: data.quizzes.questions
-      });
+      };
+
+      console.log('Transformed session details:', transformedDetails);
+    
+      setSessionDetails(transformedDetails);
     };
 
     fetchSessionDetails();

@@ -51,20 +51,30 @@ const QuizSession = () => {
           .eq('id', sessionId)
           .single();
 
+        console.log('Raw Supabase response:', sessionData);
+
         if (sessionError) throw sessionError;
 
         if (!sessionData || !sessionData.quiz) {
           throw new Error('Quiz session not found');
         }
 
-        setSession({
+        // Transform the data to match our expected types
+        const transformedSession: Session = {
           id: sessionData.id,
           code: sessionData.code,
           status: sessionData.status,
           host_id: sessionData.host_id,
-          quiz: sessionData.quiz
-        });
+          quiz: {
+            title: sessionData.quiz.title,
+            description: sessionData.quiz.description,
+            questions: sessionData.quiz.questions
+          }
+        };
+
+        console.log('Transformed session:', transformedSession);
         
+        setSession(transformedSession);
         setIsHost(sessionData.host_id === user?.id);
       } catch (error) {
         console.error('Error fetching session details:', error);
