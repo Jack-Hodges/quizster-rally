@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export interface Participant {
   id: string;
   name: string;
@@ -19,3 +21,15 @@ export interface QuizFormValues {
     correctAnswer: number;
   }[];
 }
+
+export const createQuizSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string(),
+  questions: z.array(
+    z.object({
+      question: z.string().min(1, "Question is required"),
+      options: z.array(z.string().min(1, "Option is required")),
+      correctAnswer: z.number().min(0),
+    })
+  ).min(1, "At least one question is required"),
+});

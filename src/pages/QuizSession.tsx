@@ -71,11 +71,7 @@ const QuizSession = () => {
           code: sessionData.code,
           status: sessionData.status,
           host_id: sessionData.host_id,
-          quiz: {
-            title: sessionData.quiz.title,
-            description: sessionData.quiz.description,
-            questions: sessionData.quiz.questions as QuizQuestion[],
-          },
+          quiz: sessionData.quiz as QuizData,
         };
 
         setSession(transformedSession);
