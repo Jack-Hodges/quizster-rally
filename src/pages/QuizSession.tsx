@@ -4,20 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { QuizSession as QuizSessionComponent } from "@/components/quiz/QuizSession";
-
-interface QuizQuestion {
-  question: string;
-  options: string[];
-  correctAnswer: number;
-}
-
-interface QuizData {
-  title: string;
-  description: string;
-  questions: QuizQuestion[];
-}
+import { QuizData } from "@/types/quiz";
 
 interface Session {
   id: string;

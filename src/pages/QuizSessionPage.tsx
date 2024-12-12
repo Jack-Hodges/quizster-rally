@@ -5,12 +5,7 @@ import { QuizSession } from "@/components/quiz/QuizSession";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-
-interface QuizQuestion {
-  question: string;
-  options: string[];
-  correctAnswer: number;
-}
+import { QuizQuestion } from "@/types/quiz";
 
 interface SessionDetails {
   code: string;
@@ -66,14 +61,12 @@ const QuizSessionPage = () => {
           return;
         }
 
-        const transformedDetails: SessionDetails = {
+        setSessionDetails({
           code: data.code,
           status: data.status,
           host_id: data.host_id,
           questions: data.quiz.questions
-        };
-
-        setSessionDetails(transformedDetails);
+        });
       } catch (error) {
         console.error('Error fetching session details:', error);
         toast({
