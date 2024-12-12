@@ -37,7 +37,7 @@ const QuizSessionPage = () => {
             code, 
             status,
             host_id,
-            quiz:quizzes (
+            quiz:quizzes!quiz_sessions_quiz_id_fkey (
               questions
             )
           `)

@@ -7,14 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { QuizSession as QuizSessionComponent } from "@/components/quiz/QuizSession";
 
+interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+}
+
 interface QuizData {
   title: string;
   description: string;
-  questions: {
-    question: string;
-    options: string[];
-    correctAnswer: number;
-  }[];
+  questions: QuizQuestion[];
 }
 
 interface Session {
@@ -29,12 +31,17 @@ const QuizSession = () => {
   const { sessionId } = useParams();
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
   const [isHost, setIsHost] = useState(false);
 
   useEffect(() => {
     const fetchSessionDetails = async () => {
       try {
+        if (!sessionId) {
+          throw new Error("No session ID provided");
+        }
+
         const { data: sessionData, error: sessionError } = await supabase
           .from("quiz_sessions")
           .select(`
@@ -42,8 +49,7 @@ const QuizSession = () => {
             code,
             status,
             host_id,
-            quiz_id,
-            quiz:quizzes (
+            quiz:quizzes!quiz_sessions_quiz_id_fkey (
               title,
               description,
               questions
@@ -52,13 +58,12 @@ const QuizSession = () => {
           .eq("id", sessionId)
           .single();
 
-        console.log("Raw Supabase response:", sessionData);
-        console.log("Title is:", sessionData.quiz);
+        if (sessionError) {
+          throw sessionError;
+        }
 
-        if (sessionError || !sessionData || !sessionData.quiz) {
-          throw new Error(
-            sessionError?.message || "Quiz session or quiz details not found"
-          );
+        if (!sessionData || !sessionData.quiz) {
+          throw new Error("Quiz session not found");
         }
 
         const transformedSession: Session = {
@@ -69,11 +74,10 @@ const QuizSession = () => {
           quiz: {
             title: sessionData.quiz.title,
             description: sessionData.quiz.description,
-            questions: sessionData.quiz.questions,
+            questions: sessionData.quiz.questions as QuizQuestion[],
           },
         };
 
-        console.log("Transformed session:", transformedSession);
         setSession(transformedSession);
         setIsHost(sessionData.host_id === user?.id);
       } catch (error) {
@@ -83,14 +87,25 @@ const QuizSession = () => {
           description: "Failed to load session details",
           variant: "destructive",
         });
+        navigate("/join");
       }
     };
 
     fetchSessionDetails();
-  }, [sessionId, toast, user?.id]);
+  }, [sessionId, toast, user?.id, navigate]);
 
   if (!session) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-blue-50 p-4 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardContent className="p-6">
+            <div className="text-center">
+              <p className="text-lg">Loading quiz session...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
