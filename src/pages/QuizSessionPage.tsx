@@ -12,63 +12,77 @@ interface QuizQuestion {
   correctAnswer: number;
 }
 
+interface SessionDetails {
+  code: string;
+  status: string;
+  host_id: string;
+  questions: QuizQuestion[];
+}
+
 const QuizSessionPage = () => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [sessionDetails, setSessionDetails] = useState<{
-    code: string;
-    status: string;
-    host_id: string;
-    questions: QuizQuestion[];
-  } | null>(null);
+  const [sessionDetails, setSessionDetails] = useState<SessionDetails | null>(null);
 
   useEffect(() => {
     const fetchSessionDetails = async () => {
       if (!sessionId) return;
 
-      const { data, error } = await supabase
-        .from("quiz_sessions")
-        .select(`
-          code, 
-          status,
-          host_id,
-          quiz:quizzes (
-            questions
-          )
-        `)
-        .eq("id", sessionId)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from("quiz_sessions")
+          .select(`
+            code, 
+            status,
+            host_id,
+            quiz:quizzes (
+              questions
+            )
+          `)
+          .eq("id", sessionId)
+          .single();
 
-      if (error) {
+        if (error) {
+          console.error('Supabase error:', error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to load quiz session",
+          });
+          navigate("/join");
+          return;
+        }
+
+        if (!data || !data.quiz) {
+          console.error('No data or quiz found');
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Quiz session not found",
+          });
+          navigate("/join");
+          return;
+        }
+
+        const transformedDetails: SessionDetails = {
+          code: data.code,
+          status: data.status,
+          host_id: data.host_id,
+          questions: data.quiz.questions
+        };
+
+        setSessionDetails(transformedDetails);
+      } catch (error) {
+        console.error('Error fetching session details:', error);
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to load quiz session",
+          description: "An error occurred while loading the session",
         });
         navigate("/join");
-        return;
       }
-
-      setSessionDetails({
-      if (!data || !data.quiz) {
-        console.error('No data or quiz found');
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Quiz session not found",
-        });
-        navigate("/join");
-        return;
-      }
-
-      const transformedDetails: SessionDetails = {
-        code: data.code,
-        status: data.status,
-        host_id: data.host_id,
-        questions: data.quizzes.questions
-      });
     };
 
     fetchSessionDetails();
