@@ -85,18 +85,21 @@ export type Database = {
           created_at: string
           current_question_index: number
           id: string
+          question_state: string
           session_id: string
         }
         Insert: {
           created_at?: string
           current_question_index?: number
           id?: string
+          question_state?: string
           session_id: string
         }
         Update: {
           created_at?: string
           current_question_index?: number
           id?: string
+          question_state?: string
           session_id?: string
         }
         Relationships: [
