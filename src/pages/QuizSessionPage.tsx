@@ -65,7 +65,7 @@ const QuizSessionPage = () => {
           code: data.code,
           status: data.status,
           host_id: data.host_id,
-          questions: data.quiz.questions
+          questions: data.quiz.questions as QuizQuestion[]
         });
       } catch (error) {
         console.error('Error fetching session details:', error);

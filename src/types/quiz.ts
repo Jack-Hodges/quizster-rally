@@ -12,6 +12,12 @@ export interface QuizQuestion {
   correctAnswer: number;
 }
 
+export interface QuizData {
+  title: string;
+  description: string;
+  questions: QuizQuestion[];
+}
+
 export interface QuizFormValues {
   title: string;
   description: string;
