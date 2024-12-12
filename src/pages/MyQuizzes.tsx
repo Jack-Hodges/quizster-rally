@@ -136,7 +136,7 @@ const MyQuizzes = () => {
                         <Button variant="outline" size="sm" onClick={() => navigate(`/quiz/${quiz.id}`)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => navigate(`/edit/${quiz.id}`)}>
+                        <Button variant="outline" size="sm" onClick={() => navigate(`/quiz/${quiz.id}/edit`)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button 

@@ -7,6 +7,8 @@ import JoinQuiz from "@/pages/JoinQuiz";
 import CreateQuiz from "@/pages/CreateQuiz";
 import MyQuizzes from "@/pages/MyQuizzes";
 import QuizSession from "@/pages/QuizSession";
+import ViewQuiz from "@/pages/ViewQuiz";
+import EditQuiz from "@/pages/EditQuiz";
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
           <Route path="/create" element={<CreateQuiz />} />
           <Route path="/my-quizzes" element={<MyQuizzes />} />
           <Route path="/session/:sessionId" element={<QuizSession />} />
+          <Route path="/quiz/:quizId" element={<ViewQuiz />} />
+          <Route path="/quiz/:quizId/edit" element={<EditQuiz />} />
         </Routes>
         <Toaster />
       </AuthProvider>
