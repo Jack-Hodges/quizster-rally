@@ -21,11 +21,7 @@ export interface QuizData {
 export interface QuizFormValues {
   title: string;
   description: string;
-  questions: {
-    question: string;
-    options: string[];
-    correctAnswer: number;
-  }[];
+  questions: QuizQuestion[];
 }
 
 export const createQuizSchema = z.object({

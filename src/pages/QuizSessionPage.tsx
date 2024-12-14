@@ -5,13 +5,13 @@ import { QuizSession } from "@/components/quiz/QuizSession";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { QuizQuestion } from "@/types/quiz";
+import { QuizData, QuizQuestion } from "@/types/quiz";
 
 interface SessionDetails {
   code: string;
   status: string;
   host_id: string;
-  questions: QuizQuestion[];
+  quiz: QuizData;
 }
 
 const QuizSessionPage = () => {
@@ -33,6 +33,8 @@ const QuizSessionPage = () => {
             status,
             host_id,
             quiz:quizzes!quiz_sessions_quiz_id_fkey (
+              title,
+              description,
               questions
             )
           `)
@@ -61,12 +63,18 @@ const QuizSessionPage = () => {
           return;
         }
 
-        // Ensure we're getting the questions array from the quiz object
+        // Transform the data to match our expected types
+        const quizData: QuizData = {
+          title: data.quiz.title,
+          description: data.quiz.description,
+          questions: data.quiz.questions as QuizQuestion[]
+        };
+
         setSessionDetails({
           code: data.code,
           status: data.status,
           host_id: data.host_id,
-          questions: data.quiz.questions as QuizQuestion[]
+          quiz: quizData
         });
       } catch (error) {
         console.error('Error fetching session details:', error);
@@ -102,7 +110,7 @@ const QuizSessionPage = () => {
               sessionId={sessionId} 
               isHost={user?.id === sessionDetails.host_id}
               status={sessionDetails.status}
-              questions={sessionDetails.questions}
+              questions={sessionDetails.quiz.questions}
             />
           </div>
         </div>
