@@ -61,6 +61,7 @@ const QuizSessionPage = () => {
           return;
         }
 
+        // Ensure we're getting the questions array from the quiz object
         setSessionDetails({
           code: data.code,
           status: data.status,
