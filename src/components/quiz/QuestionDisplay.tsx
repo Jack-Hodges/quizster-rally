@@ -38,20 +38,35 @@ export function QuestionDisplay({
     if (selectedOption === null) return;
 
     try {
-      const { data: participantData } = await supabase
+      // Get all participants for this session and user
+      const { data: participantsData, error: participantsError } = await supabase
         .from("quiz_participants")
         .select("id")
-        .eq("session_id", sessionId)
-        .single();
+        .eq("session_id", sessionId);
 
-      if (!participantData) return;
+      if (participantsError) throw participantsError;
+      
+      // If no participants found or empty array, show error
+      if (!participantsData || participantsData.length === 0) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Participant not found",
+        });
+        return;
+      }
 
-      await supabase.from("participant_answers").insert({
-        participant_id: participantData.id,
+      // Use the first participant found
+      const participantId = participantsData[0].id;
+
+      const { error: answerError } = await supabase.from("participant_answers").insert({
+        participant_id: participantId,
         session_id: sessionId,
         question_index: questionIndex,
         selected_option: selectedOption,
       });
+
+      if (answerError) throw answerError;
 
       setSubmittedAnswer(true);
       setIsCorrect(selectedOption === question.correctAnswer);
@@ -61,6 +76,7 @@ export function QuestionDisplay({
         description: "Answer submitted successfully!",
       });
     } catch (error) {
+      console.error("Error submitting answer:", error);
       toast({
         variant: "destructive",
         title: "Error",
