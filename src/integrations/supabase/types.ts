@@ -115,6 +115,7 @@ export type Database = {
       quiz_sessions: {
         Row: {
           code: string
+          completed_at: string | null
           created_at: string
           host_id: string
           id: string
@@ -123,6 +124,7 @@ export type Database = {
         }
         Insert: {
           code: string
+          completed_at?: string | null
           created_at?: string
           host_id: string
           id?: string
@@ -131,6 +133,7 @@ export type Database = {
         }
         Update: {
           code?: string
+          completed_at?: string | null
           created_at?: string
           host_id?: string
           id?: string
